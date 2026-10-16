@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +28,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T> Default for LinkedList<T> where T: Ord + Clone {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T> LinkedList<T> where T: Ord + Clone {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,14 +68,38 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
+
+	pub fn merge(list_a:LinkedList<T>, list_b:LinkedList<T>) -> Self {
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut merged_list = LinkedList::<T>::new();
+        let mut a_node = list_a.start;
+        let mut b_node = list_b.start;
+        while a_node.is_some() && b_node.is_some() {
+            let a_val = unsafe { &(*a_node.unwrap().as_ptr()).val };
+            let b_val = unsafe { &(*b_node.unwrap().as_ptr()).val };
+            if a_val <= b_val {
+                merged_list.add(a_val.clone());
+                a_node = unsafe { (*a_node.unwrap().as_ptr()).next };
+            } else {
+                merged_list.add(b_val.clone());
+                b_node = unsafe { (*b_node.unwrap().as_ptr()).next };
+            }
         }
+        if a_node.is_some() {
+            while let Some(node) = a_node {
+                let val = unsafe { &(*node.as_ptr()).val };
+                merged_list.add(val.clone());
+                a_node = unsafe { (*node.as_ptr()).next };
+            }
+        }
+        if b_node.is_some() {
+            while let Some(node) = b_node {
+                let val = unsafe { &(*node.as_ptr()).val };
+                merged_list.add(val.clone());
+                b_node = unsafe { (*node.as_ptr()).next };
+            }
+        }
+        merged_list
 	}
 }
 
